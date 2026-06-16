@@ -34,3 +34,8 @@ export function canViewSecurity(role: Role): boolean {
 export function canManageUsers(role: Role): boolean {
   return isAdmin(role);
 }
+
+/** IT staff and admins may author/edit knowledge base articles. */
+export function canManageKb(role: Role): boolean {
+  return isStaff(role);
+}

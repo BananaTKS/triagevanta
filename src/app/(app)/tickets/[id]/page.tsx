@@ -2,7 +2,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/dal";
-import { getTicketDetail, listStaffUsers } from "@/lib/queries";
+import {
+  getTicketDetail,
+  listStaffUsers,
+  relatedArticlesForTicket,
+} from "@/lib/queries";
 import { canViewInternalNotes, isStaff } from "@/lib/rbac";
 import { Card, PageHeader, SectionTitle } from "@/components/ui";
 import {
@@ -40,6 +44,7 @@ export default async function TicketDetailPage({
 
   const staff = isStaff(user.role);
   const staffList = staff ? await listStaffUsers() : [];
+  const related = await relatedArticlesForTicket(ticket.category);
   const now = new Date();
   const overdue = isOverdue(ticket.slaDueAt, ticket.status, now);
 
@@ -159,6 +164,24 @@ export default async function TicketDetailPage({
                   />
                 </div>
               </div>
+            </Card>
+          )}
+
+          {related.length > 0 && (
+            <Card className="p-5">
+              <SectionTitle>Related articles</SectionTitle>
+              <ul className="space-y-2">
+                {related.map((a) => (
+                  <li key={a.id}>
+                    <Link
+                      href={`/kb/${a.id}`}
+                      className="text-sm text-teal-700 hover:underline"
+                    >
+                      {a.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </Card>
           )}
         </div>

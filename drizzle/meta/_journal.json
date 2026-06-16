@@ -8,6 +8,13 @@
       "when": 1781541748597,
       "tag": "0000_clean_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781615335078,
+      "tag": "0001_crazy_peter_parker",
+      "breakpoints": true
     }
   ]
 }

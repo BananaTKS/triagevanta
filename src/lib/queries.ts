@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  kbArticles,
   securityEvents,
   tickets,
   users,
@@ -156,3 +157,50 @@ export async function listAllUsers() {
 }
 
 export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
+
+// --- Knowledge base ----------------------------------------------------------
+
+export async function listArticles(q?: string) {
+  const where = q
+    ? or(ilike(kbArticles.title, `%${q}%`), ilike(kbArticles.body, `%${q}%`))
+    : undefined;
+  return db.query.kbArticles.findMany({
+    where,
+    orderBy: [desc(kbArticles.updatedAt)],
+    with: { author: { columns: { id: true, name: true } } },
+  });
+}
+
+export type ArticleListItem = Awaited<ReturnType<typeof listArticles>>[number];
+
+export async function getArticle(id: string, userId: string) {
+  const article = await db.query.kbArticles.findFirst({
+    where: eq(kbArticles.id, id),
+    with: {
+      author: { columns: { id: true, name: true } },
+      votes: { columns: { userId: true, helpful: true } },
+    },
+  });
+  if (!article) return null;
+
+  const helpful = article.votes.filter((v) => v.helpful).length;
+  const notHelpful = article.votes.length - helpful;
+  const myVote = article.votes.find((v) => v.userId === userId)?.helpful ?? null;
+
+  return { ...article, helpful, notHelpful, myVote };
+}
+
+export type ArticleDetail = NonNullable<Awaited<ReturnType<typeof getArticle>>>;
+
+/** Knowledge base articles in the same category as a ticket. */
+export async function relatedArticlesForTicket(
+  category: TicketCategory,
+  limit = 3,
+) {
+  return db.query.kbArticles.findMany({
+    where: eq(kbArticles.category, category),
+    orderBy: [desc(kbArticles.updatedAt)],
+    limit,
+    columns: { id: true, title: true, category: true },
+  });
+}

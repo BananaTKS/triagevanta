@@ -39,6 +39,8 @@ async function main() {
   const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
   // Clear existing data (FK-safe order).
+  await db.delete(schema.kbArticleVotes);
+  await db.delete(schema.kbArticles);
   await db.delete(schema.securityEvents);
   await db.delete(schema.ticketNotes);
   await db.delete(schema.tickets);
@@ -293,9 +295,88 @@ async function main() {
     })),
   );
 
+  type SeedArticle = {
+    title: string;
+    body: string;
+    category: schema.TicketCategory;
+    authorId: string;
+    createdMs: number;
+    updatedMs: number;
+  };
+
+  const articleSeeds: SeedArticle[] = [
+    {
+      title: "Connecting to the office WiFi",
+      body: "1. Select the 'Corp-Secure' network.\n2. Enter your email and network password.\n3. Accept the certificate prompt.\n\nIf it keeps dropping, forget the network and reconnect, or move closer to an access point. Still stuck? Open a ticket under the Network category.",
+      category: "network",
+      authorId: it,
+      createdMs: now - 30 * DAY,
+      updatedMs: now - 3 * DAY,
+    },
+    {
+      title: "Setting up the VPN from home",
+      body: "Install the VPN client from the Software Center, then sign in with your work account. You must approve the MFA prompt within 30 seconds.\n\n'Authentication failed' usually means your password recently changed — update it in the client settings and try again.",
+      category: "access",
+      authorId: admin,
+      createdMs: now - 21 * DAY,
+      updatedMs: now - 1 * DAY,
+    },
+    {
+      title: "Speeding up a slow laptop",
+      body: "1. Restart (don't just close the lid) at least once a week.\n2. Check Task Manager for apps using high memory.\n3. Make sure pending Windows updates are installed.\n\nIf boot still takes several minutes, you may need a RAM upgrade — raise a Hardware ticket.",
+      category: "hardware",
+      authorId: it,
+      createdMs: now - 14 * DAY,
+      updatedMs: now - 5 * DAY,
+    },
+    {
+      title: "Requesting new software",
+      body: "Check the Software Center first — most approved apps can be installed without a ticket. For anything not listed, open a ticket under the Software category and include the business justification so we can fast-track licensing.",
+      category: "software",
+      authorId: riley,
+      createdMs: now - 10 * DAY,
+      updatedMs: now - 10 * DAY,
+    },
+    {
+      title: "Resetting your account password",
+      body: "Use the self-service portal at reset.triagevanta.dev. You'll need access to your registered MFA device.\n\nLocked out completely? Open an Access ticket and IT will verify your identity before issuing a temporary password.",
+      category: "access",
+      authorId: it,
+      createdMs: now - 7 * DAY,
+      updatedMs: now - 2 * DAY,
+    },
+  ];
+
+  const insertedArticles = await db
+    .insert(schema.kbArticles)
+    .values(
+      articleSeeds.map((a) => ({
+        title: a.title,
+        body: a.body,
+        category: a.category,
+        authorId: a.authorId,
+        createdAt: new Date(a.createdMs),
+        updatedAt: new Date(a.updatedMs),
+      })),
+    )
+    .returning({ id: schema.kbArticles.id, title: schema.kbArticles.title });
+
+  const articleId = (title: string): string => {
+    const a = insertedArticles.find((x: { title: string }) => x.title === title);
+    if (!a) throw new Error(`Seed article not found: ${title}`);
+    return a.id;
+  };
+
+  await db.insert(schema.kbArticleVotes).values([
+    { articleId: articleId("Connecting to the office WiFi"), userId: sam, helpful: true },
+    { articleId: articleId("Connecting to the office WiFi"), userId: dana, helpful: true },
+    { articleId: articleId("Setting up the VPN from home"), userId: dana, helpful: true },
+    { articleId: articleId("Speeding up a slow laptop"), userId: sam, helpful: false },
+  ]);
+
   await close();
   console.log(
-    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${events.length} security events.`,
+    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${events.length} security events.`,
   );
   console.log(`Demo login: admin@triagevanta.dev / ${DEMO_PASSWORD}`);
 }

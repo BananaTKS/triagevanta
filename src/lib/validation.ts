@@ -61,3 +61,18 @@ export const SetRoleSchema = z.object({
   userId: z.uuid(),
   role: z.enum(roleEnum.enumValues),
 });
+
+export const ArticleSchema = z.object({
+  title: z.string().trim().min(4, "Title must be at least 4 characters.").max(160),
+  body: z
+    .string()
+    .trim()
+    .min(20, "Article body must be at least 20 characters.")
+    .max(20000),
+  category: z.enum(ticketCategoryEnum.enumValues),
+});
+
+export const VoteSchema = z.object({
+  articleId: z.uuid(),
+  helpful: z.boolean(),
+});

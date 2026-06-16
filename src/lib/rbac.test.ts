@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canManageKb,
   canManageTickets,
   canManageUsers,
   canViewInternalNotes,
@@ -45,5 +46,11 @@ describe("role predicates", () => {
     expect(canManageUsers("employee")).toBe(false);
     expect(canManageUsers("it_staff")).toBe(false);
     expect(canManageUsers("admin")).toBe(true);
+  });
+
+  it("knowledge base authoring requires staff", () => {
+    expect(canManageKb("employee")).toBe(false);
+    expect(canManageKb("it_staff")).toBe(true);
+    expect(canManageKb("admin")).toBe(true);
   });
 });

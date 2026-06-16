@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-export type NavKey = "dashboard" | "tickets" | "security" | "users";
+export type NavKey = "dashboard" | "tickets" | "kb" | "security" | "users";
 
 export interface NavItem {
   href: string;
@@ -48,6 +48,14 @@ function Icon({ name }: { name: NavKey }) {
         <circle cx="9" cy="7" r="4" />
         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+  if (name === "kb") {
+    return (
+      <svg {...common}>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
       </svg>
     );
   }

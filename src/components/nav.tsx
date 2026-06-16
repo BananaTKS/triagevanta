@@ -9,6 +9,7 @@ function navItems(user: CurrentUser): NavItem[] {
   const items: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
     { href: "/tickets", label: "Tickets", icon: "tickets" },
+    { href: "/kb", label: "Knowledge", icon: "kb" },
   ];
   if (canViewSecurity(user.role)) {
     items.push({ href: "/security", label: "Security", icon: "security" });

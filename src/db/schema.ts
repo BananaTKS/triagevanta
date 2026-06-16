@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -118,6 +119,40 @@ export const securityEvents = pgTable(
   ],
 );
 
+// Knowledge base articles (reuse the ticket category taxonomy).
+export const kbArticles = pgTable(
+  "kb_articles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    category: ticketCategoryEnum("category").notNull().default("other"),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("kb_articles_category_idx").on(t.category)],
+);
+
+// One "was this helpful?" vote per user per article.
+export const kbArticleVotes = pgTable(
+  "kb_article_votes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => kbArticles.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    helpful: boolean("helpful").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("kb_votes_article_user_idx").on(t.articleId, t.userId)],
+);
+
 // ---------------------------------------------------------------------------
 // Relations (for the relational query API)
 // ---------------------------------------------------------------------------
@@ -159,6 +194,25 @@ export const securityEventsRelations = relations(securityEvents, ({ one }) => ({
   }),
 }));
 
+export const kbArticlesRelations = relations(kbArticles, ({ one, many }) => ({
+  author: one(users, {
+    fields: [kbArticles.authorId],
+    references: [users.id],
+  }),
+  votes: many(kbArticleVotes),
+}));
+
+export const kbArticleVotesRelations = relations(kbArticleVotes, ({ one }) => ({
+  article: one(kbArticles, {
+    fields: [kbArticleVotes.articleId],
+    references: [kbArticles.id],
+  }),
+  user: one(users, {
+    fields: [kbArticleVotes.userId],
+    references: [users.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -168,6 +222,8 @@ export type Ticket = typeof tickets.$inferSelect;
 export type NewTicket = typeof tickets.$inferInsert;
 export type TicketNote = typeof ticketNotes.$inferSelect;
 export type SecurityEvent = typeof securityEvents.$inferSelect;
+export type KbArticle = typeof kbArticles.$inferSelect;
+export type KbArticleVote = typeof kbArticleVotes.$inferSelect;
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];
