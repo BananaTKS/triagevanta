@@ -1,0 +1,27 @@
+# Optional local PostgreSQL for parity with production.
+# By default the app runs against an embedded PGlite database (no Docker needed).
+# To use this instead, start it and set DATABASE_URL in .env.local:
+#   docker compose up -d
+#   DATABASE_URL="postgres://triagevanta:triagevanta@localhost:5432/triagevanta"
+#   npm run db:setup
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: triagevanta-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: triagevanta
+      POSTGRES_PASSWORD: triagevanta
+      POSTGRES_DB: triagevanta
+    ports:
+      - "5432:5432"
+    volumes:
+      - triagevanta_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triagevanta"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  triagevanta_pgdata:
