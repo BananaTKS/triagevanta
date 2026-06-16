@@ -29,3 +29,8 @@ export function canManageTickets(role: Role): boolean {
 export function canViewSecurity(role: Role): boolean {
   return isAdmin(role);
 }
+
+/** Only admins may manage users and their roles. */
+export function canManageUsers(role: Role): boolean {
+  return isAdmin(role);
+}

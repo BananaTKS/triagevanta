@@ -39,6 +39,8 @@ on at the end.
 
 - **Authentication & RBAC** — email/password with bcrypt hashing and JWT
   sessions; three roles: employee, IT staff, admin.
+- **Admin user management** — admins promote/demote roles from a Users page;
+  every change is written to the audit log.
 - **Ticketing** — create, triage, assign, and update tickets with categories,
   priorities, and **SLA due dates** (with overdue detection).
 - **Internal vs. public notes** — staff can post internal notes that employees

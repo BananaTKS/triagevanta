@@ -12,6 +12,8 @@ export const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",
 };
 
+export const ROLE_ORDER: Role[] = ["employee", "it_staff", "admin"];
+
 export const STATUS_LABELS: Record<TicketStatus, string> = {
   open: "Open",
   in_progress: "In Progress",

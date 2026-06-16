@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  roleEnum,
   ticketCategoryEnum,
   ticketPriorityEnum,
   ticketStatusEnum,
@@ -54,4 +55,9 @@ export const AssignSchema = z.object({
   assigneeId: z
     .union([z.uuid(), z.literal("")])
     .transform((v) => (v === "" ? null : v)),
+});
+
+export const SetRoleSchema = z.object({
+  userId: z.uuid(),
+  role: z.enum(roleEnum.enumValues),
 });

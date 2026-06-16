@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canManageTickets,
+  canManageUsers,
   canViewInternalNotes,
   canViewSecurity,
   hasRole,
@@ -38,5 +39,11 @@ describe("role predicates", () => {
   it("security dashboard requires admin", () => {
     expect(canViewSecurity("it_staff")).toBe(false);
     expect(canViewSecurity("admin")).toBe(true);
+  });
+
+  it("user management requires admin", () => {
+    expect(canManageUsers("employee")).toBe(false);
+    expect(canManageUsers("it_staff")).toBe(false);
+    expect(canManageUsers("admin")).toBe(true);
   });
 });

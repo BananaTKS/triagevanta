@@ -1,5 +1,5 @@
 import type { CurrentUser } from "@/lib/dal";
-import { canViewSecurity } from "@/lib/rbac";
+import { canManageUsers, canViewSecurity } from "@/lib/rbac";
 import { Logo } from "@/components/logo";
 import { NavLinks, type NavItem } from "@/components/nav-links";
 import { RoleBadge } from "@/components/badges";
@@ -12,6 +12,9 @@ function navItems(user: CurrentUser): NavItem[] {
   ];
   if (canViewSecurity(user.role)) {
     items.push({ href: "/security", label: "Security", icon: "security" });
+  }
+  if (canManageUsers(user.role)) {
+    items.push({ href: "/users", label: "Users", icon: "users" });
   }
   return items;
 }

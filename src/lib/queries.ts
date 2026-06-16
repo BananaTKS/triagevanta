@@ -71,3 +71,13 @@ export async function getRecentSecurityEvents(limit = 100) {
 export type SecurityEventRow = Awaited<
   ReturnType<typeof getRecentSecurityEvents>
 >[number];
+
+/** All users (admin user-management view). */
+export async function listAllUsers() {
+  return db.query.users.findMany({
+    columns: { id: true, name: true, email: true, role: true, createdAt: true },
+    orderBy: (u, { asc }) => [asc(u.name)],
+  });
+}
+
+export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
