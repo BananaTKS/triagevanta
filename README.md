@@ -23,6 +23,10 @@ operations and a deliberate, documented security model.
 
 ![Security monitoring dashboard](docs/screenshots/security.png)
 
+**User management** — admins assign roles; every change is audit-logged
+
+![User management](docs/screenshots/users.png)
+
 **Sign in**
 
 ![Sign in](docs/screenshots/login.png)
