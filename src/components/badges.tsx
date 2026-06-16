@@ -1,4 +1,7 @@
 import type {
+  AssetCondition,
+  AssetStatus,
+  AssetType,
   Role,
   SecurityEventType,
   TicketCategory,
@@ -7,6 +10,11 @@ import type {
 } from "@/db/schema";
 import { cn } from "@/lib/cn";
 import {
+  ASSET_CONDITION_CHIP,
+  ASSET_CONDITION_LABELS,
+  ASSET_STATUS_CHIP,
+  ASSET_STATUS_LABELS,
+  ASSET_TYPE_LABELS,
   CATEGORY_LABELS,
   PRIORITY_CHIP,
   PRIORITY_LABELS,
@@ -46,6 +54,22 @@ export function SecurityEventBadge({ type }: { type: SecurityEventType }) {
   return (
     <span className={cn(chip, SECURITY_EVENT_CHIP[type])}>
       {SECURITY_EVENT_LABELS[type]}
+    </span>
+  );
+}
+
+export function AssetTypeBadge({ type }: { type: AssetType }) {
+  return <span className="text-xs text-zinc-500">{ASSET_TYPE_LABELS[type]}</span>;
+}
+
+export function AssetStatusBadge({ status }: { status: AssetStatus }) {
+  return <span className={cn(chip, ASSET_STATUS_CHIP[status])}>{ASSET_STATUS_LABELS[status]}</span>;
+}
+
+export function AssetConditionBadge({ condition }: { condition: AssetCondition }) {
+  return (
+    <span className={cn(chip, ASSET_CONDITION_CHIP[condition])}>
+      {ASSET_CONDITION_LABELS[condition]}
     </span>
   );
 }

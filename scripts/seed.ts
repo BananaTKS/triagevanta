@@ -39,6 +39,8 @@ async function main() {
   const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
   // Clear existing data (FK-safe order).
+  await db.delete(schema.assetEvents);
+  await db.delete(schema.assets);
   await db.delete(schema.notifications);
   await db.delete(schema.kbArticleVotes);
   await db.delete(schema.kbArticles);
@@ -429,9 +431,89 @@ async function main() {
     })),
   );
 
+  type SeedAsset = {
+    assetTag: string;
+    name: string;
+    type: schema.AssetType;
+    status: schema.AssetStatus;
+    condition: schema.AssetCondition;
+    assignedToId: string | null;
+    warrantyMs: number;
+  };
+
+  const assetSeeds: SeedAsset[] = [
+    { assetTag: "LAP-001", name: "Dell Latitude 5440", type: "laptop", status: "in_use", condition: "good", assignedToId: sam, warrantyMs: now + 400 * DAY },
+    { assetTag: "LAP-002", name: 'MacBook Pro 14"', type: "laptop", status: "in_use", condition: "new", assignedToId: dana, warrantyMs: now + 600 * DAY },
+    { assetTag: "LAP-009", name: "HP EliteBook 840", type: "laptop", status: "repair", condition: "fair", assignedToId: null, warrantyMs: now + 120 * DAY },
+    { assetTag: "LAP-014", name: "Lenovo ThinkPad T14", type: "laptop", status: "spare", condition: "good", assignedToId: null, warrantyMs: now + 300 * DAY },
+    { assetTag: "MON-021", name: 'Dell U2723QE 27" Monitor', type: "monitor", status: "in_use", condition: "good", assignedToId: sam, warrantyMs: now + 250 * DAY },
+    { assetTag: "PHN-007", name: "iPhone 14", type: "phone", status: "in_use", condition: "good", assignedToId: admin, warrantyMs: now + 200 * DAY },
+  ];
+
+  const insertedAssets = await db
+    .insert(schema.assets)
+    .values(
+      assetSeeds.map((a) => ({
+        assetTag: a.assetTag,
+        name: a.name,
+        type: a.type,
+        status: a.status,
+        condition: a.condition,
+        assignedToId: a.assignedToId,
+        warrantyExpiresAt: new Date(a.warrantyMs),
+        createdAt: new Date(now - 60 * DAY),
+        updatedAt: new Date(now - 10 * DAY),
+      })),
+    )
+    .returning({ id: schema.assets.id, assetTag: schema.assets.assetTag });
+
+  const assetByTag = (tag: string): string => {
+    const a = insertedAssets.find((x: { assetTag: string }) => x.assetTag === tag);
+    if (!a) throw new Error(`Seed asset not found: ${tag}`);
+    return a.id;
+  };
+
+  const nameById: Record<string, string> = {
+    [admin]: "Alex Morgan",
+    [it]: "Jordan Lee",
+    [riley]: "Riley Chen",
+    [sam]: "Sam Patel",
+    [dana]: "Dana Kim",
+  };
+
+  type SeedAssetEvent = {
+    assetId: string;
+    type: schema.AssetEventType;
+    actorId: string;
+    note: string;
+    createdMs: number;
+  };
+
+  const assetEventRows: SeedAssetEvent[] = [];
+  for (const a of assetSeeds) {
+    const aid = assetByTag(a.assetTag);
+    assetEventRows.push({ assetId: aid, type: "created", actorId: it, note: `Registered ${a.assetTag}`, createdMs: now - 60 * DAY });
+    if (a.assignedToId) {
+      assetEventRows.push({ assetId: aid, type: "assigned", actorId: it, note: `Assigned to ${nameById[a.assignedToId]}`, createdMs: now - 40 * DAY });
+    }
+    if (a.status === "repair") {
+      assetEventRows.push({ assetId: aid, type: "status_change", actorId: riley, note: "Status set to In repair", createdMs: now - 3 * DAY });
+    }
+  }
+
+  await db.insert(schema.assetEvents).values(
+    assetEventRows.map((e) => ({
+      assetId: e.assetId,
+      type: e.type,
+      actorId: e.actorId,
+      note: e.note,
+      createdAt: new Date(e.createdMs),
+    })),
+  );
+
   await close();
   console.log(
-    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${notificationSeeds.length} notifications, ${events.length} security events.`,
+    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${insertedAssets.length} assets, ${notificationSeeds.length} notifications, ${events.length} security events.`,
   );
   console.log(`Demo login: admin@triagevanta.dev / ${DEMO_PASSWORD}`);
 }

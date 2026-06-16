@@ -39,3 +39,8 @@ export function canManageUsers(role: Role): boolean {
 export function canManageKb(role: Role): boolean {
   return isStaff(role);
 }
+
+/** IT staff and admins may manage the asset inventory. */
+export function canManageAssets(role: Role): boolean {
+  return isStaff(role);
+}

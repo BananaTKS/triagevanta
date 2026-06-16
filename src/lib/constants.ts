@@ -1,4 +1,8 @@
 import type {
+  AssetCondition,
+  AssetEventType,
+  AssetStatus,
+  AssetType,
   Role,
   SecurityEventType,
   TicketCategory,
@@ -97,4 +101,68 @@ export const SECURITY_EVENT_CHIP: Record<SecurityEventType, string> = {
   role_change: "bg-violet-50 text-violet-700",
   ticket_assigned: "bg-sky-50 text-sky-700",
   admin_action: "bg-amber-50 text-amber-700",
+};
+
+// --- Assets ------------------------------------------------------------------
+export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
+  laptop: "Laptop",
+  desktop: "Desktop",
+  monitor: "Monitor",
+  phone: "Phone",
+  peripheral: "Peripheral",
+  other: "Other",
+};
+
+export const ASSET_TYPE_ORDER: AssetType[] = [
+  "laptop",
+  "desktop",
+  "monitor",
+  "phone",
+  "peripheral",
+  "other",
+];
+
+export const ASSET_STATUS_LABELS: Record<AssetStatus, string> = {
+  in_use: "In use",
+  spare: "Spare",
+  repair: "In repair",
+  retired: "Retired",
+};
+
+export const ASSET_STATUS_ORDER: AssetStatus[] = [
+  "in_use",
+  "spare",
+  "repair",
+  "retired",
+];
+
+export const ASSET_STATUS_CHIP: Record<AssetStatus, string> = {
+  in_use: "bg-emerald-50 text-emerald-700",
+  spare: "bg-sky-50 text-sky-700",
+  repair: "bg-amber-50 text-amber-700",
+  retired: "bg-zinc-100 text-zinc-600",
+};
+
+export const ASSET_CONDITION_LABELS: Record<AssetCondition, string> = {
+  new: "New",
+  good: "Good",
+  fair: "Fair",
+  poor: "Poor",
+};
+
+export const ASSET_CONDITION_ORDER: AssetCondition[] = ["new", "good", "fair", "poor"];
+
+export const ASSET_CONDITION_CHIP: Record<AssetCondition, string> = {
+  new: "bg-emerald-50 text-emerald-700",
+  good: "bg-sky-50 text-sky-700",
+  fair: "bg-amber-50 text-amber-700",
+  poor: "bg-rose-50 text-rose-700",
+};
+
+export const ASSET_EVENT_LABELS: Record<AssetEventType, string> = {
+  created: "Created",
+  assigned: "Assigned",
+  unassigned: "Unassigned",
+  status_change: "Status change",
+  updated: "Updated",
 };

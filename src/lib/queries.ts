@@ -1,6 +1,7 @@
 import "server-only";
 import {
   and,
+  asc,
   count,
   desc,
   eq,
@@ -12,11 +13,14 @@ import {
 } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  assets,
   kbArticles,
   notifications,
   securityEvents,
   tickets,
   users,
+  type AssetStatus,
+  type AssetType,
   type TicketCategory,
   type TicketPriority,
   type TicketStatus,
@@ -158,6 +162,58 @@ export async function listAllUsers() {
 }
 
 export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
+
+// --- Assets ------------------------------------------------------------------
+
+export async function listAssets(filter: {
+  q?: string;
+  status?: AssetStatus;
+  type?: AssetType;
+}) {
+  const conditions: (SQL | undefined)[] = [];
+  if (filter.status) conditions.push(eq(assets.status, filter.status));
+  if (filter.type) conditions.push(eq(assets.type, filter.type));
+  if (filter.q) {
+    const term = `%${filter.q}%`;
+    conditions.push(
+      or(
+        ilike(assets.assetTag, term),
+        ilike(assets.name, term),
+        ilike(assets.serialNumber, term),
+      ),
+    );
+  }
+  return db.query.assets.findMany({
+    where: and(...conditions),
+    orderBy: [asc(assets.assetTag)],
+    with: { assignedTo: { columns: { id: true, name: true } } },
+  });
+}
+
+export type AssetListItem = Awaited<ReturnType<typeof listAssets>>[number];
+
+export async function getAsset(id: string) {
+  return db.query.assets.findFirst({
+    where: eq(assets.id, id),
+    with: {
+      assignedTo: { columns: { id: true, name: true, email: true } },
+      events: {
+        orderBy: (e, { desc }) => [desc(e.createdAt)],
+        with: { actor: { columns: { id: true, name: true } } },
+      },
+    },
+  });
+}
+
+export type AssetDetail = NonNullable<Awaited<ReturnType<typeof getAsset>>>;
+
+/** Any user can be assigned an asset (e.g. an employee's laptop). */
+export async function listAssignableUsers() {
+  return db.query.users.findMany({
+    columns: { id: true, name: true },
+    orderBy: (u, { asc }) => [asc(u.name)],
+  });
+}
 
 // --- Knowledge base ----------------------------------------------------------
 

@@ -1,5 +1,8 @@
 import { z } from "zod";
 import {
+  assetConditionEnum,
+  assetStatusEnum,
+  assetTypeEnum,
   roleEnum,
   ticketCategoryEnum,
   ticketPriorityEnum,
@@ -75,4 +78,43 @@ export const ArticleSchema = z.object({
 export const VoteSchema = z.object({
   articleId: z.uuid(),
   helpful: z.boolean(),
+});
+
+export const AssetSchema = z.object({
+  assetTag: z.string().trim().min(2, "Asset tag is required.").max(40),
+  name: z.string().trim().min(2, "Name is required.").max(120),
+  type: z.enum(assetTypeEnum.enumValues),
+  condition: z.enum(assetConditionEnum.enumValues),
+  serialNumber: z
+    .string()
+    .trim()
+    .max(80)
+    .optional()
+    .transform((v) => (v ? v : null)),
+  warranty: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }),
+  notes: z
+    .string()
+    .trim()
+    .max(2000)
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+
+export const AssignAssetSchema = z.object({
+  assetId: z.uuid(),
+  assigneeId: z
+    .union([z.uuid(), z.literal("")])
+    .transform((v) => (v === "" ? null : v)),
+});
+
+export const AssetStatusSchema = z.object({
+  assetId: z.uuid(),
+  status: z.enum(assetStatusEnum.enumValues),
 });

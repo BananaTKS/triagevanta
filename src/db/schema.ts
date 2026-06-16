@@ -49,6 +49,37 @@ export const securityEventTypeEnum = pgEnum("security_event_type", [
   "admin_action",
 ]);
 
+export const assetTypeEnum = pgEnum("asset_type", [
+  "laptop",
+  "desktop",
+  "monitor",
+  "phone",
+  "peripheral",
+  "other",
+]);
+
+export const assetStatusEnum = pgEnum("asset_status", [
+  "in_use",
+  "spare",
+  "repair",
+  "retired",
+]);
+
+export const assetConditionEnum = pgEnum("asset_condition", [
+  "new",
+  "good",
+  "fair",
+  "poor",
+]);
+
+export const assetEventTypeEnum = pgEnum("asset_event_type", [
+  "created",
+  "assigned",
+  "unassigned",
+  "status_change",
+  "updated",
+]);
+
 // ---------------------------------------------------------------------------
 // Tables
 // ---------------------------------------------------------------------------
@@ -172,6 +203,45 @@ export const notifications = pgTable(
   (t) => [index("notifications_recipient_idx").on(t.recipientId)],
 );
 
+// IT asset inventory.
+export const assets = pgTable(
+  "assets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    assetTag: text("asset_tag").notNull().unique(),
+    name: text("name").notNull(),
+    type: assetTypeEnum("type").notNull().default("laptop"),
+    serialNumber: text("serial_number"),
+    status: assetStatusEnum("status").notNull().default("spare"),
+    condition: assetConditionEnum("condition").notNull().default("good"),
+    assignedToId: uuid("assigned_to_id").references(() => users.id),
+    warrantyExpiresAt: timestamp("warranty_expires_at", { withTimezone: true }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("assets_status_idx").on(t.status),
+    index("assets_assigned_to_idx").on(t.assignedToId),
+  ],
+);
+
+// Asset lifecycle history (assignments, status changes, edits).
+export const assetEvents = pgTable(
+  "asset_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    assetId: uuid("asset_id")
+      .notNull()
+      .references(() => assets.id, { onDelete: "cascade" }),
+    type: assetEventTypeEnum("type").notNull(),
+    actorId: uuid("actor_id").references(() => users.id),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("asset_events_asset_idx").on(t.assetId)],
+);
+
 // ---------------------------------------------------------------------------
 // Relations (for the relational query API)
 // ---------------------------------------------------------------------------
@@ -232,6 +302,25 @@ export const kbArticleVotesRelations = relations(kbArticleVotes, ({ one }) => ({
   }),
 }));
 
+export const assetsRelations = relations(assets, ({ one, many }) => ({
+  assignedTo: one(users, {
+    fields: [assets.assignedToId],
+    references: [users.id],
+  }),
+  events: many(assetEvents),
+}));
+
+export const assetEventsRelations = relations(assetEvents, ({ one }) => ({
+  asset: one(assets, {
+    fields: [assetEvents.assetId],
+    references: [assets.id],
+  }),
+  actor: one(users, {
+    fields: [assetEvents.actorId],
+    references: [users.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -244,6 +333,12 @@ export type SecurityEvent = typeof securityEvents.$inferSelect;
 export type KbArticle = typeof kbArticles.$inferSelect;
 export type KbArticleVote = typeof kbArticleVotes.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type Asset = typeof assets.$inferSelect;
+export type AssetEvent = typeof assetEvents.$inferSelect;
+export type AssetType = (typeof assetTypeEnum.enumValues)[number];
+export type AssetStatus = (typeof assetStatusEnum.enumValues)[number];
+export type AssetCondition = (typeof assetConditionEnum.enumValues)[number];
+export type AssetEventType = (typeof assetEventTypeEnum.enumValues)[number];
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];
