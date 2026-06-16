@@ -1,7 +1,24 @@
 import "server-only";
-import { desc, eq, inArray } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/db";
-import { securityEvents, tickets, users } from "@/db/schema";
+import {
+  securityEvents,
+  tickets,
+  users,
+  type TicketCategory,
+  type TicketPriority,
+  type TicketStatus,
+} from "@/db/schema";
 import { canViewInternalNotes, isStaff } from "@/lib/rbac";
 import type { CurrentUser } from "@/lib/dal";
 
@@ -22,6 +39,64 @@ export async function listTicketsForUser(user: CurrentUser) {
 }
 
 export type TicketListItem = Awaited<ReturnType<typeof listTicketsForUser>>[number];
+
+export const TICKETS_PAGE_SIZE = 8;
+
+export interface TicketFilter {
+  q?: string;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  category?: TicketCategory;
+  /** A user id, or the literal "unassigned". */
+  assignee?: string;
+  page?: number;
+}
+
+/** Role-scoped ticket search with filters and pagination. */
+export async function searchTickets(user: CurrentUser, filter: TicketFilter) {
+  const conditions: (SQL | undefined)[] = [];
+
+  // Row-level scope: employees only ever see their own tickets.
+  if (!isStaff(user.role)) conditions.push(eq(tickets.createdById, user.id));
+
+  if (filter.status) conditions.push(eq(tickets.status, filter.status));
+  if (filter.priority) conditions.push(eq(tickets.priority, filter.priority));
+  if (filter.category) conditions.push(eq(tickets.category, filter.category));
+  if (filter.assignee === "unassigned") {
+    conditions.push(isNull(tickets.assignedToId));
+  } else if (filter.assignee) {
+    conditions.push(eq(tickets.assignedToId, filter.assignee));
+  }
+  if (filter.q) {
+    const term = `%${filter.q}%`;
+    conditions.push(
+      or(ilike(tickets.title, term), ilike(tickets.description, term)),
+    );
+  }
+
+  const where = and(...conditions);
+  const page = Math.max(1, filter.page ?? 1);
+  const offset = (page - 1) * TICKETS_PAGE_SIZE;
+
+  const [{ value: total }] = await db
+    .select({ value: count() })
+    .from(tickets)
+    .where(where);
+
+  const items = await db.query.tickets.findMany({
+    where,
+    orderBy: [desc(tickets.createdAt)],
+    limit: TICKETS_PAGE_SIZE,
+    offset,
+    with: {
+      createdBy: { columns: { id: true, name: true, email: true } },
+      assignedTo: { columns: { id: true, name: true } },
+    },
+  });
+
+  const totalPages = Math.max(1, Math.ceil(total / TICKETS_PAGE_SIZE));
+  return { items, total, page, totalPages };
+}
 
 export async function getTicketDetail(id: string, user: CurrentUser) {
   const ticket = await db.query.tickets.findFirst({
