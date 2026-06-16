@@ -9,6 +9,8 @@ import { getCurrentUser, requireRole } from "@/lib/dal";
 import { canViewInternalNotes, isStaff } from "@/lib/rbac";
 import { computeSlaDueAt } from "@/lib/sla";
 import { logSecurityEvent } from "@/lib/audit";
+import { notify } from "@/lib/notify";
+import { STATUS_LABELS } from "@/lib/constants";
 import {
   AddNoteSchema,
   AssignSchema,
@@ -56,6 +58,13 @@ export async function createTicketAction(
     return { error: "Could not create the ticket. Please try again." };
   }
 
+  await notify({
+    recipientId: user.id,
+    subject: `Ticket received: ${title}`,
+    body: `Hi ${user.name}, we've received your ticket "${title}" and the IT team will review it shortly.`,
+    ticketId: ticket.id,
+  });
+
   revalidatePath("/tickets");
   revalidatePath("/dashboard");
   redirect(`/tickets/${ticket.id}`);
@@ -81,27 +90,39 @@ export async function addNoteAction(
   // Confirm the user may access this ticket before letting them comment.
   const ticket = await db.query.tickets.findFirst({
     where: eq(tickets.id, ticketId),
-    columns: { id: true, createdById: true },
+    columns: { id: true, createdById: true, title: true },
   });
   if (!ticket) return { error: "Ticket not found." };
   if (!isStaff(user.role) && ticket.createdById !== user.id) {
     return { error: "You do not have access to this ticket." };
   }
 
+  // Only staff/admin can post internal notes.
+  const internal = canViewInternalNotes(user.role) ? isInternal : false;
   await db.insert(ticketNotes).values({
     ticketId,
     authorId: user.id,
     body,
-    // Only staff/admin can post internal notes.
-    isInternal: canViewInternalNotes(user.role) ? isInternal : false,
+    isInternal: internal,
   });
 
   revalidateTicket(ticketId);
+
+  // Notify the requester of a public reply from someone else.
+  if (!internal && ticket.createdById !== user.id) {
+    await notify({
+      recipientId: ticket.createdById,
+      subject: `New reply on your ticket: ${ticket.title}`,
+      body: `${user.name} replied to your ticket "${ticket.title}".`,
+      ticketId,
+    });
+  }
+
   return {};
 }
 
 export async function updateStatusAction(formData: FormData): Promise<void> {
-  await requireRole("it_staff", "admin");
+  const actor = await requireRole("it_staff", "admin");
 
   const parsed = UpdateStatusSchema.safeParse({
     ticketId: formData.get("ticketId"),
@@ -116,6 +137,20 @@ export async function updateStatusAction(formData: FormData): Promise<void> {
     .where(eq(tickets.id, ticketId));
 
   revalidateTicket(ticketId);
+
+  // Notify the requester (unless they changed it themselves).
+  const ticket = await db.query.tickets.findFirst({
+    where: eq(tickets.id, ticketId),
+    columns: { createdById: true, title: true },
+  });
+  if (ticket && ticket.createdById !== actor.id) {
+    await notify({
+      recipientId: ticket.createdById,
+      subject: `Ticket status updated: ${ticket.title}`,
+      body: `Your ticket "${ticket.title}" is now ${STATUS_LABELS[status]}.`,
+      ticketId,
+    });
+  }
 }
 
 export async function assignTicketAction(formData: FormData): Promise<void> {
@@ -151,4 +186,20 @@ export async function assignTicketAction(formData: FormData): Promise<void> {
   });
 
   revalidateTicket(ticketId);
+
+  // Notify the new assignee (mock email).
+  if (assigneeId && assigneeId !== actor.id) {
+    const ticket = await db.query.tickets.findFirst({
+      where: eq(tickets.id, ticketId),
+      columns: { title: true },
+    });
+    if (ticket) {
+      await notify({
+        recipientId: assigneeId,
+        subject: `Ticket assigned to you: ${ticket.title}`,
+        body: `You have been assigned the ticket "${ticket.title}".`,
+        ticketId,
+      });
+    }
+  }
 }

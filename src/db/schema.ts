@@ -153,6 +153,25 @@ export const kbArticleVotes = pgTable(
   (t) => [uniqueIndex("kb_votes_article_user_idx").on(t.articleId, t.userId)],
 );
 
+// Mock email notifications — what the system "would" email, per recipient.
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => users.id),
+    recipientEmail: text("recipient_email").notNull(),
+    subject: text("subject").notNull(),
+    body: text("body").notNull(),
+    ticketId: uuid("ticket_id").references(() => tickets.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("notifications_recipient_idx").on(t.recipientId)],
+);
+
 // ---------------------------------------------------------------------------
 // Relations (for the relational query API)
 // ---------------------------------------------------------------------------
@@ -224,6 +243,7 @@ export type TicketNote = typeof ticketNotes.$inferSelect;
 export type SecurityEvent = typeof securityEvents.$inferSelect;
 export type KbArticle = typeof kbArticles.$inferSelect;
 export type KbArticleVote = typeof kbArticleVotes.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];

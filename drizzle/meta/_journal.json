@@ -15,6 +15,13 @@
       "when": 1781615335078,
       "tag": "0001_crazy_peter_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781616203807,
+      "tag": "0002_pretty_archangel",
+      "breakpoints": true
     }
   ]
 }

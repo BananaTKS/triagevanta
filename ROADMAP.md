@@ -17,10 +17,10 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 
 ## Phase 2 — service desk depth
 
-- [ ] Email notifications (currently events only)
-- [ ] Ticket search, filtering, and pagination
+- [x] Ticket search, filtering, and pagination
+- [x] Knowledge base articles, linked to tickets, with "did this help?" tracking
+- [x] Mock email-notification log (per-user inbox)
 - [ ] Saved views / queues per IT staff member
-- [ ] Knowledge base articles, linked to tickets, with "did this help?" tracking
 
 ## Phase 3 — IT operations
 

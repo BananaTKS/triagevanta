@@ -51,6 +51,12 @@ on at the end.
   never see.
 - **Role-aware dashboards** — employees see their own tickets; staff/admin see
   the full queue, unassigned counts, and SLA breaches.
+- **Search & filtering** — full-text ticket search plus status / priority /
+  category / assignee filters, with pagination.
+- **Knowledge base** — searchable articles with "was this helpful?" voting;
+  related articles surface automatically on matching tickets.
+- **Notifications** — ticket activity (created, assigned, status change, replies)
+  generates a per-user inbox that simulates outbound email.
 - **Security monitoring (admin)** — a unified audit log plus a dashboard that
   flags **failed-login spikes** (5+ failures per account/IP in 15 minutes).
 - **Zero-setup local dev** — runs on an embedded PostgreSQL (PGlite) with no

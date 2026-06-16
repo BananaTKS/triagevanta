@@ -39,6 +39,7 @@ async function main() {
   const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
   // Clear existing data (FK-safe order).
+  await db.delete(schema.notifications);
   await db.delete(schema.kbArticleVotes);
   await db.delete(schema.kbArticles);
   await db.delete(schema.securityEvents);
@@ -374,9 +375,63 @@ async function main() {
     { articleId: articleId("Speeding up a slow laptop"), userId: sam, helpful: false },
   ]);
 
+  const notificationSeeds = [
+    {
+      recipientId: sam,
+      recipientEmail: "employee@triagevanta.dev",
+      subject: "Ticket received: Cannot connect to office WiFi",
+      body: `Hi Sam Patel, we received your ticket and the IT team will review it shortly.`,
+      ticketId: ticketId("Cannot connect to office WiFi"),
+      createdMs: now - 1 * DAY,
+    },
+    {
+      recipientId: sam,
+      recipientEmail: "employee@triagevanta.dev",
+      subject: "Ticket status updated: External monitor flickering",
+      body: `Your ticket "External monitor flickering" is now Resolved.`,
+      ticketId: ticketId("External monitor flickering"),
+      createdMs: now - 4 * DAY,
+    },
+    {
+      recipientId: dana,
+      recipientEmail: "dana@triagevanta.dev",
+      subject: "New reply on your ticket: Laptop extremely slow after update",
+      body: `Jordan Lee replied to your ticket "Laptop extremely slow after update".`,
+      ticketId: ticketId("Laptop extremely slow after update"),
+      createdMs: now - 1 * DAY,
+    },
+    {
+      recipientId: admin,
+      recipientEmail: "admin@triagevanta.dev",
+      subject: "Ticket assigned to you: VPN access not working from home",
+      body: `You have been assigned the ticket "VPN access not working from home".`,
+      ticketId: ticketId("VPN access not working from home"),
+      createdMs: now - 55 * MIN,
+    },
+    {
+      recipientId: it,
+      recipientEmail: "it@triagevanta.dev",
+      subject: "Ticket assigned to you: Laptop extremely slow after update",
+      body: `You have been assigned the ticket "Laptop extremely slow after update".`,
+      ticketId: ticketId("Laptop extremely slow after update"),
+      createdMs: now - 2 * DAY + HOUR,
+    },
+  ];
+
+  await db.insert(schema.notifications).values(
+    notificationSeeds.map((n) => ({
+      recipientId: n.recipientId,
+      recipientEmail: n.recipientEmail,
+      subject: n.subject,
+      body: n.body,
+      ticketId: n.ticketId,
+      createdAt: new Date(n.createdMs),
+    })),
+  );
+
   await close();
   console.log(
-    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${events.length} security events.`,
+    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${notificationSeeds.length} notifications, ${events.length} security events.`,
   );
   console.log(`Demo login: admin@triagevanta.dev / ${DEMO_PASSWORD}`);
 }

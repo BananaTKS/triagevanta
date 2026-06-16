@@ -13,6 +13,7 @@ import {
 import { db } from "@/db";
 import {
   kbArticles,
+  notifications,
   securityEvents,
   tickets,
   users,
@@ -191,6 +192,20 @@ export async function getArticle(id: string, userId: string) {
 }
 
 export type ArticleDetail = NonNullable<Awaited<ReturnType<typeof getArticle>>>;
+
+// --- Notifications -----------------------------------------------------------
+
+export async function listNotificationsForUser(userId: string, limit = 50) {
+  return db.query.notifications.findMany({
+    where: eq(notifications.recipientId, userId),
+    orderBy: [desc(notifications.createdAt)],
+    limit,
+  });
+}
+
+export type NotificationRow = Awaited<
+  ReturnType<typeof listNotificationsForUser>
+>[number];
 
 /** Knowledge base articles in the same category as a ticket. */
 export async function relatedArticlesForTicket(
