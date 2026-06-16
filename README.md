@@ -7,10 +7,25 @@ staff triage and resolve them against SLAs, and admins get a security dashboard
 with audit logging and failed-login alerting. It is built around real IT
 operations and a deliberate, documented security model.
 
+[![CI](https://github.com/BananaTKS/triagevanta/actions/workflows/ci.yml/badge.svg)](https://github.com/BananaTKS/triagevanta/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Drizzle-336791)
 ![Tests](https://img.shields.io/badge/tests-vitest-6da55f)
+
+## Screenshots
+
+**Service desk dashboard** — role-aware queue with SLA tracking and overdue flags
+
+![Service desk dashboard](docs/screenshots/dashboard.png)
+
+**Security monitoring** — audit log with failed-login spike alerting
+
+![Security monitoring dashboard](docs/screenshots/security.png)
+
+**Sign in**
+
+![Sign in](docs/screenshots/login.png)
 
 ## Why I built this
 
