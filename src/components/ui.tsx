@@ -124,6 +124,26 @@ export function EmptyState({
   );
 }
 
+export function ProgressBar({ done, total }: { done: number; total: number }) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs text-zinc-500">
+        <span>
+          {done}/{total} complete
+        </span>
+        <span className="tabular-nums">{pct}%</span>
+      </div>
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+        <div
+          className="h-full rounded-full bg-teal-600 transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function FieldError({ messages }: { messages?: string[] }) {
   if (!messages || messages.length === 0) return null;
   return <p className="mt-1 text-xs text-rose-600">{messages[0]}</p>;

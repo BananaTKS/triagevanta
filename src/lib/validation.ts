@@ -118,3 +118,25 @@ export const AssetStatusSchema = z.object({
   assetId: z.uuid(),
   status: z.enum(assetStatusEnum.enumValues),
 });
+
+export const CreateOnboardingSchema = z.object({
+  employeeName: z.string().trim().min(2, "Employee name is required.").max(120),
+  title: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .transform((v) => (v ? v : null)),
+  startDate: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }),
+});
+
+export const ToggleTaskSchema = z.object({
+  taskId: z.uuid(),
+});

@@ -44,3 +44,8 @@ export function canManageKb(role: Role): boolean {
 export function canManageAssets(role: Role): boolean {
   return isStaff(role);
 }
+
+/** IT staff and admins may manage employee onboarding. */
+export function canManageOnboarding(role: Role): boolean {
+  return isStaff(role);
+}

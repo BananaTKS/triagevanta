@@ -1,5 +1,10 @@
 import type { CurrentUser } from "@/lib/dal";
-import { canManageAssets, canManageUsers, canViewSecurity } from "@/lib/rbac";
+import {
+  canManageAssets,
+  canManageOnboarding,
+  canManageUsers,
+  canViewSecurity,
+} from "@/lib/rbac";
 import { Logo } from "@/components/logo";
 import { NavLinks, type NavItem } from "@/components/nav-links";
 import { RoleBadge } from "@/components/badges";
@@ -14,6 +19,9 @@ function navItems(user: CurrentUser): NavItem[] {
   ];
   if (canManageAssets(user.role)) {
     items.push({ href: "/assets", label: "Assets", icon: "assets" });
+  }
+  if (canManageOnboarding(user.role)) {
+    items.push({ href: "/onboarding", label: "Onboarding", icon: "onboarding" });
   }
   if (canViewSecurity(user.role)) {
     items.push({ href: "/security", label: "Security", icon: "security" });

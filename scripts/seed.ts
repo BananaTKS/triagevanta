@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import bcrypt from "bcryptjs";
 import * as schema from "../src/db/schema.ts";
+import { ONBOARDING_TEMPLATE } from "../src/lib/onboarding-template.ts";
 
 // Seeds demo data. Driver mirrors the app: node-postgres when DATABASE_URL is
 // set, otherwise the embedded PGlite database at ./.pglite.
@@ -39,6 +40,8 @@ async function main() {
   const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
   // Clear existing data (FK-safe order).
+  await db.delete(schema.onboardingTasks);
+  await db.delete(schema.onboardings);
   await db.delete(schema.assetEvents);
   await db.delete(schema.assets);
   await db.delete(schema.notifications);
@@ -511,9 +514,40 @@ async function main() {
     })),
   );
 
+  const obSeeds = [
+    { employeeName: "Priya Sharma", title: "Support Engineer", startMs: now + 7 * DAY, createdById: it, doneCount: 5, createdMs: now - 3 * DAY },
+    { employeeName: "Marcus Lee", title: "Sales Associate", startMs: now + 14 * DAY, createdById: admin, doneCount: 0, createdMs: now - 1 * DAY },
+  ];
+  let onboardingCount = 0;
+  for (const o of obSeeds) {
+    const [ob] = await db
+      .insert(schema.onboardings)
+      .values({
+        employeeName: o.employeeName,
+        title: o.title,
+        startDate: new Date(o.startMs),
+        createdById: o.createdById,
+        createdAt: new Date(o.createdMs),
+        updatedAt: new Date(o.createdMs),
+      })
+      .returning({ id: schema.onboardings.id });
+    if (!ob) continue;
+    await db.insert(schema.onboardingTasks).values(
+      ONBOARDING_TEMPLATE.map((t, i) => ({
+        onboardingId: ob.id,
+        category: t.category,
+        label: t.label,
+        sortOrder: i,
+        done: i < o.doneCount,
+        doneAt: i < o.doneCount ? new Date(now - 1 * DAY) : null,
+      })),
+    );
+    onboardingCount++;
+  }
+
   await close();
   console.log(
-    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${insertedAssets.length} assets, ${notificationSeeds.length} notifications, ${events.length} security events.`,
+    `Seeded ${insertedUsers.length} users, ${insertedTickets.length} tickets, ${insertedArticles.length} KB articles, ${insertedAssets.length} assets, ${onboardingCount} onboardings, ${notificationSeeds.length} notifications, ${events.length} security events.`,
   );
   console.log(`Demo login: admin@triagevanta.dev / ${DEMO_PASSWORD}`);
 }

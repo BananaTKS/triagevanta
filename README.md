@@ -59,6 +59,8 @@ on at the end.
   generates a per-user inbox that simulates outbound email.
 - **Asset inventory (staff)** — track laptops/monitors/phones with serial,
   warranty and condition; assign to users, with an automatic lifecycle history.
+- **Onboarding tracker (staff)** — new-joiner checklists from a template,
+  grouped by area, with a live completion progress bar.
 - **Security monitoring (admin)** — a unified audit log plus a dashboard that
   flags **failed-login spikes** (5+ failures per account/IP in 15 minutes).
 - **Zero-setup local dev** — runs on an embedded PostgreSQL (PGlite) with no

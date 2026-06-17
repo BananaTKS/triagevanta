@@ -16,6 +16,7 @@ import {
   assets,
   kbArticles,
   notifications,
+  onboardings,
   securityEvents,
   tickets,
   users,
@@ -162,6 +163,41 @@ export async function listAllUsers() {
 }
 
 export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
+
+// --- Onboarding --------------------------------------------------------------
+
+export async function listOnboardings() {
+  const rows = await db.query.onboardings.findMany({
+    orderBy: [desc(onboardings.createdAt)],
+    with: { tasks: { columns: { done: true } } },
+  });
+  return rows.map((o) => ({
+    id: o.id,
+    employeeName: o.employeeName,
+    title: o.title,
+    startDate: o.startDate,
+    total: o.tasks.length,
+    done: o.tasks.filter((t) => t.done).length,
+  }));
+}
+
+export type OnboardingListItem = Awaited<
+  ReturnType<typeof listOnboardings>
+>[number];
+
+export async function getOnboarding(id: string) {
+  return db.query.onboardings.findFirst({
+    where: eq(onboardings.id, id),
+    with: {
+      createdBy: { columns: { id: true, name: true } },
+      tasks: { orderBy: (t, { asc }) => [asc(t.sortOrder)] },
+    },
+  });
+}
+
+export type OnboardingDetail = NonNullable<
+  Awaited<ReturnType<typeof getOnboarding>>
+>;
 
 // --- Assets ------------------------------------------------------------------
 

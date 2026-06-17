@@ -25,7 +25,8 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 ## Phase 3 — IT operations
 
 - [x] Asset inventory (laptops/monitors, assignment, warranty, lifecycle log)
-- [ ] Employee onboarding tracker (checklists, progress, PDF summary)
+- [x] Employee onboarding tracker (checklist template, completion progress)
+- [ ] Onboarding PDF / report export
 
 ## Phase 4 — automation
 

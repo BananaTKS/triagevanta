@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -242,6 +243,36 @@ export const assetEvents = pgTable(
   (t) => [index("asset_events_asset_idx").on(t.assetId)],
 );
 
+// New-joiner onboarding records + their checklist tasks.
+export const onboardings = pgTable("onboardings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  employeeName: text("employee_name").notNull(),
+  title: text("title"),
+  startDate: timestamp("start_date", { withTimezone: true }),
+  createdById: uuid("created_by_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const onboardingTasks = pgTable(
+  "onboarding_tasks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    onboardingId: uuid("onboarding_id")
+      .notNull()
+      .references(() => onboardings.id, { onDelete: "cascade" }),
+    category: text("category").notNull().default("General"),
+    label: text("label").notNull(),
+    done: boolean("done").notNull().default(false),
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("onboarding_tasks_onboarding_idx").on(t.onboardingId)],
+);
+
 // ---------------------------------------------------------------------------
 // Relations (for the relational query API)
 // ---------------------------------------------------------------------------
@@ -321,6 +352,21 @@ export const assetEventsRelations = relations(assetEvents, ({ one }) => ({
   }),
 }));
 
+export const onboardingsRelations = relations(onboardings, ({ one, many }) => ({
+  createdBy: one(users, {
+    fields: [onboardings.createdById],
+    references: [users.id],
+  }),
+  tasks: many(onboardingTasks),
+}));
+
+export const onboardingTasksRelations = relations(onboardingTasks, ({ one }) => ({
+  onboarding: one(onboardings, {
+    fields: [onboardingTasks.onboardingId],
+    references: [onboardings.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -339,6 +385,8 @@ export type AssetType = (typeof assetTypeEnum.enumValues)[number];
 export type AssetStatus = (typeof assetStatusEnum.enumValues)[number];
 export type AssetCondition = (typeof assetConditionEnum.enumValues)[number];
 export type AssetEventType = (typeof assetEventTypeEnum.enumValues)[number];
+export type Onboarding = typeof onboardings.$inferSelect;
+export type OnboardingTask = typeof onboardingTasks.$inferSelect;
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];
