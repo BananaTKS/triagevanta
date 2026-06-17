@@ -33,8 +33,9 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 - [x] Auto-categorize tickets by keyword
 - [ ] Auto-suggest knowledge base articles
 - [x] Ticket CSV export
-- [ ] Auto-close stale resolved tickets
+- [x] Auto-close stale resolved tickets (cron-able script)
 - [ ] Scheduled monthly IT report
+- [ ] Auto-suggest KB articles on ticket creation
 
 ## Phase 5 — observability & hardening
 

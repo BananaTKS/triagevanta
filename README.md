@@ -127,6 +127,7 @@ string (append `?sslmode=require` if the host needs TLS) and run `npm run db:mig
 | `npm run db:migrate`  | Apply migrations                             |
 | `npm run db:seed`     | Seed demo data                               |
 | `npm run db:setup`    | Migrate + seed                               |
+| `npm run auto-close`  | Close resolved tickets idle > N days (cron-able) |
 
 ## Testing
 

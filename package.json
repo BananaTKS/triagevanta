@@ -13,7 +13,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts",
     "db:seed": "node --env-file-if-exists=.env.local scripts/seed.ts",
-    "db:setup": "node --env-file-if-exists=.env.local scripts/migrate.ts && node --env-file-if-exists=.env.local scripts/seed.ts"
+    "db:setup": "node --env-file-if-exists=.env.local scripts/migrate.ts && node --env-file-if-exists=.env.local scripts/seed.ts",
+    "auto-close": "node --env-file-if-exists=.env.local scripts/auto-close.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.2",
