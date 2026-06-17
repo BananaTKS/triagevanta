@@ -15,13 +15,13 @@ function createDb(): DB {
   const url = process.env.DATABASE_URL;
 
   if (url) {
-    // Production / Docker / Neon: real PostgreSQL over TCP.
+    // Production / Docker / managed Postgres: real PostgreSQL over TCP.
     const { drizzle } = require("drizzle-orm/node-postgres");
     const { Pool } = require("pg");
     const pool = new Pool({
       connectionString: url,
       max: 5,
-      // Neon and most managed Postgres require TLS; local Docker does not.
+      // Most managed Postgres hosts require TLS; local Docker does not.
       ssl: url.includes("sslmode=require") ? { rejectUnauthorized: false } : undefined,
     });
     return drizzle(pool, { schema });

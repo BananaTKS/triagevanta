@@ -30,7 +30,7 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 
 ## Phase 4 — automation
 
-- [ ] Auto-categorize tickets by keyword
+- [x] Auto-categorize tickets by keyword
 - [ ] Auto-suggest knowledge base articles
 - [ ] Auto-close stale resolved tickets
 - [ ] Scheduled monthly IT report + CSV export

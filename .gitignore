@@ -37,9 +37,6 @@ yarn-error.log*
 # local embedded Postgres (PGlite) dev database
 /.pglite
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts

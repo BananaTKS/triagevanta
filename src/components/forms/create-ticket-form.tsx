@@ -52,6 +52,9 @@ export function CreateTicketForm() {
               </option>
             ))}
           </select>
+          <p className="mt-1 text-xs text-zinc-400">
+            Leave as Other to auto-detect from your description.
+          </p>
         </div>
         <div>
           <label className={labelClass} htmlFor="priority">

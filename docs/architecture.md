@@ -13,7 +13,7 @@ separate API server in v1.
 | UI        | Tailwind CSS v4                                                   |
 | DB        | PostgreSQL via Drizzle ORM                                        |
 | Dev DB    | Embedded **PGlite** (Postgres in WASM) — no Docker required       |
-| Prod DB   | `pg` driver against Docker/Neon Postgres                         |
+| Prod DB   | `pg` driver against Docker / managed Postgres                    |
 | Auth      | Hand-rolled sessions: `jose` (JWT) + `bcryptjs`, httpOnly cookie  |
 | Tests     | Vitest                                                            |
 

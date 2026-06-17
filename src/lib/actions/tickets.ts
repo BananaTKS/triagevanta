@@ -8,6 +8,7 @@ import { ticketNotes, tickets, users } from "@/db/schema";
 import { getCurrentUser, requireRole } from "@/lib/dal";
 import { canViewInternalNotes, isStaff } from "@/lib/rbac";
 import { computeSlaDueAt } from "@/lib/sla";
+import { categorizeTicket } from "@/lib/categorize";
 import { logSecurityEvent } from "@/lib/audit";
 import { notify } from "@/lib/notify";
 import { STATUS_LABELS } from "@/lib/constants";
@@ -42,13 +43,17 @@ export async function createTicketAction(
   }
 
   const { title, description, priority, category } = parsed.data;
+  // Auto-label when the requester left the category as "Other".
+  const finalCategory =
+    category === "other" ? (categorizeTicket(title, description) ?? "other") : category;
+
   const [ticket] = await db
     .insert(tickets)
     .values({
       title,
       description,
       priority,
-      category,
+      category: finalCategory,
       createdById: user.id,
       slaDueAt: computeSlaDueAt(priority),
     })

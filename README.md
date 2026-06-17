@@ -53,6 +53,8 @@ on at the end.
   the full queue, unassigned counts, and SLA breaches.
 - **Search & filtering** — full-text ticket search plus status / priority /
   category / assignee filters, with pagination.
+- **Auto-categorization** — tickets submitted as *Other* are automatically
+  labelled (network / hardware / software / access) from their text.
 - **Knowledge base** — searchable articles with "was this helpful?" voting;
   related articles surface automatically on matching tickets.
 - **Notifications** — ticket activity (created, assigned, status change, replies)
@@ -109,8 +111,8 @@ npm run db:setup
 npm run dev
 ```
 
-For production (e.g. Vercel + Neon), set `DATABASE_URL` to your Postgres
-connection string (append `?sslmode=require`) and run `npm run db:migrate`.
+For a hosted database, set `DATABASE_URL` to any managed Postgres connection
+string (append `?sslmode=require` if the host needs TLS) and run `npm run db:migrate`.
 
 ## Scripts
 
