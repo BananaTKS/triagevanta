@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
+import Link from "next/link";
 import { createTicketAction } from "@/lib/actions/tickets";
 import { EMPTY_FORM_STATE } from "@/lib/form";
 import { SubmitButton } from "@/components/submit-button";
@@ -12,8 +13,30 @@ import {
   PRIORITY_ORDER,
 } from "@/lib/constants";
 
+type Suggestion = { id: string; title: string; category: string };
+
 export function CreateTicketForm() {
   const [state, action] = useActionState(createTicketAction, EMPTY_FORM_STATE);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced KB lookup as the requester types a title.
+  function onTitleChange(value: string) {
+    if (timer.current) clearTimeout(timer.current);
+    const term = value.trim();
+    if (term.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    timer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/kb/suggest?q=${encodeURIComponent(term)}`);
+        if (res.ok) setSuggestions(await res.json());
+      } catch {
+        /* ignore network errors for suggestions */
+      }
+    }, 350);
+  }
 
   return (
     <form action={action} className="space-y-4">
@@ -31,10 +54,33 @@ export function CreateTicketForm() {
           id="title"
           name="title"
           placeholder="e.g. Cannot connect to office WiFi"
+          onChange={(e) => onTitleChange(e.currentTarget.value)}
           required
         />
         <FieldError messages={state.fieldErrors?.title} />
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+          <p className="mb-1 text-xs font-medium text-zinc-500">
+            These knowledge base articles might help
+          </p>
+          <ul className="space-y-1">
+            {suggestions.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/kb/${s.id}`}
+                  target="_blank"
+                  className="text-sm text-teal-700 hover:underline"
+                >
+                  {s.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="category">

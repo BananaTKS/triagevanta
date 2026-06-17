@@ -59,7 +59,8 @@ on at the end.
 - **Reports (staff)** — monthly summary: opened/resolved this month, open and
   overdue counts, and breakdowns by status and category.
 - **Knowledge base** — searchable articles with "was this helpful?" voting;
-  related articles surface automatically on matching tickets.
+  related articles surface on matching tickets, and the new-ticket form suggests
+  relevant articles live as you type.
 - **Notifications** — ticket activity (created, assigned, status change, replies)
   generates a per-user inbox that simulates outbound email.
 - **Asset inventory (staff)** — track laptops/monitors/phones with serial,

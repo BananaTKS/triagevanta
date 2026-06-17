@@ -310,6 +310,22 @@ export async function listArticles(q?: string) {
 
 export type ArticleListItem = Awaited<ReturnType<typeof listArticles>>[number];
 
+/** Token-based article suggestions (matches any word ≥3 chars in the query). */
+export async function suggestArticles(q: string, limit = 4) {
+  const words = [...new Set(q.toLowerCase().split(/\s+/).filter((w) => w.length >= 3))];
+  if (words.length === 0) return [];
+  const conditions = words.flatMap((w) => [
+    ilike(kbArticles.title, `%${w}%`),
+    ilike(kbArticles.body, `%${w}%`),
+  ]);
+  return db.query.kbArticles.findMany({
+    where: or(...conditions),
+    orderBy: [desc(kbArticles.updatedAt)],
+    limit,
+    columns: { id: true, title: true, category: true },
+  });
+}
+
 export async function getArticle(id: string, userId: string) {
   const article = await db.query.kbArticles.findFirst({
     where: eq(kbArticles.id, id),
