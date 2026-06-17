@@ -49,3 +49,8 @@ export function canManageAssets(role: Role): boolean {
 export function canManageOnboarding(role: Role): boolean {
   return isStaff(role);
 }
+
+/** IT staff and admins may view service-desk reports. */
+export function canViewReports(role: Role): boolean {
+  return isStaff(role);
+}

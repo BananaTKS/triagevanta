@@ -3,6 +3,7 @@ import {
   canManageAssets,
   canManageOnboarding,
   canManageUsers,
+  canViewReports,
   canViewSecurity,
 } from "@/lib/rbac";
 import { Logo } from "@/components/logo";
@@ -22,6 +23,9 @@ function navItems(user: CurrentUser): NavItem[] {
   }
   if (canManageOnboarding(user.role)) {
     items.push({ href: "/onboarding", label: "Onboarding", icon: "onboarding" });
+  }
+  if (canViewReports(user.role)) {
+    items.push({ href: "/reports", label: "Reports", icon: "reports" });
   }
   if (canViewSecurity(user.role)) {
     items.push({ href: "/security", label: "Security", icon: "security" });

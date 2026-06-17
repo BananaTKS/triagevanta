@@ -27,6 +27,7 @@ import {
   type TicketStatus,
 } from "@/db/schema";
 import { canViewInternalNotes, isStaff } from "@/lib/rbac";
+import { isOverdue } from "@/lib/sla";
 import type { CurrentUser } from "@/lib/dal";
 
 /**
@@ -163,6 +164,49 @@ export async function listAllUsers() {
 }
 
 export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
+
+// --- Reporting ---------------------------------------------------------------
+
+export async function getTicketReport(now: Date = new Date()) {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const rows = await db.query.tickets.findMany({
+    columns: {
+      status: true,
+      category: true,
+      createdAt: true,
+      updatedAt: true,
+      slaDueAt: true,
+    },
+  });
+
+  const isClosed = (s: TicketStatus) => s === "resolved" || s === "closed";
+  const byStatus: Partial<Record<TicketStatus, number>> = {};
+  const byCategory: Partial<Record<TicketCategory, number>> = {};
+  let openedThisMonth = 0;
+  let resolvedThisMonth = 0;
+  let openNow = 0;
+  let overdue = 0;
+
+  for (const t of rows) {
+    byStatus[t.status] = (byStatus[t.status] ?? 0) + 1;
+    byCategory[t.category] = (byCategory[t.category] ?? 0) + 1;
+    if (t.createdAt >= monthStart) openedThisMonth += 1;
+    if (isClosed(t.status) && t.updatedAt >= monthStart) resolvedThisMonth += 1;
+    if (!isClosed(t.status)) openNow += 1;
+    if (isOverdue(t.slaDueAt, t.status, now)) overdue += 1;
+  }
+
+  return {
+    total: rows.length,
+    monthStart,
+    openedThisMonth,
+    resolvedThisMonth,
+    openNow,
+    overdue,
+    byStatus,
+    byCategory,
+  };
+}
 
 // --- Onboarding --------------------------------------------------------------
 

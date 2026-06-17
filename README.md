@@ -56,6 +56,8 @@ on at the end.
 - **Auto-categorization** — tickets submitted as *Other* are automatically
   labelled (network / hardware / software / access) from their text.
 - **CSV export** — download the (role-scoped) ticket list as CSV for reporting.
+- **Reports (staff)** — monthly summary: opened/resolved this month, open and
+  overdue counts, and breakdowns by status and category.
 - **Knowledge base** — searchable articles with "was this helpful?" voting;
   related articles surface automatically on matching tickets.
 - **Notifications** — ticket activity (created, assigned, status change, replies)

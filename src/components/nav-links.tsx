@@ -11,6 +11,7 @@ export type NavKey =
   | "notifications"
   | "assets"
   | "onboarding"
+  | "reports"
   | "security"
   | "users";
 
@@ -89,6 +90,16 @@ function Icon({ name }: { name: NavKey }) {
         <rect x="8" y="2" width="8" height="4" rx="1" />
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
         <path d="m9 14 2 2 4-4" />
+      </svg>
+    );
+  }
+  if (name === "reports") {
+    return (
+      <svg {...common}>
+        <path d="M3 3v18h18" />
+        <rect x="7" y="10" width="3" height="7" />
+        <rect x="12" y="6" width="3" height="11" />
+        <rect x="17" y="13" width="3" height="4" />
       </svg>
     );
   }
