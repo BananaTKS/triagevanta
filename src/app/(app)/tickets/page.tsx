@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/dal";
 import { listStaffUsers, searchTickets, type TicketFilter } from "@/lib/queries";
 import { isStaff } from "@/lib/rbac";
-import { btnPrimary, EmptyState, PageHeader } from "@/components/ui";
+import { btnPrimary, btnSecondary, EmptyState, PageHeader } from "@/components/ui";
 import { TicketsTable } from "@/components/tickets-table";
 import { TicketFilters } from "@/components/ticket-filters";
 import { Pagination } from "@/components/pagination";
@@ -54,9 +54,14 @@ export default async function TicketsPage({
         title="Tickets"
         description={staff ? "All service desk tickets" : "Tickets you have submitted"}
         action={
-          <Link href="/tickets/new" className={btnPrimary}>
-            New ticket
-          </Link>
+          <div className="flex gap-2">
+            <a href="/tickets/export" className={btnSecondary} download>
+              Export CSV
+            </a>
+            <Link href="/tickets/new" className={btnPrimary}>
+              New ticket
+            </Link>
+          </div>
         }
       />
 

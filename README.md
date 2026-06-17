@@ -55,6 +55,7 @@ on at the end.
   category / assignee filters, with pagination.
 - **Auto-categorization** — tickets submitted as *Other* are automatically
   labelled (network / hardware / software / access) from their text.
+- **CSV export** — download the (role-scoped) ticket list as CSV for reporting.
 - **Knowledge base** — searchable articles with "was this helpful?" voting;
   related articles surface automatically on matching tickets.
 - **Notifications** — ticket activity (created, assigned, status change, replies)
