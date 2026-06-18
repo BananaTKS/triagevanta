@@ -40,6 +40,7 @@ async function main() {
   const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
   // Clear existing data (FK-safe order).
+  await db.delete(schema.savedViews);
   await db.delete(schema.onboardingTasks);
   await db.delete(schema.onboardings);
   await db.delete(schema.assetEvents);
@@ -544,6 +545,12 @@ async function main() {
     );
     onboardingCount++;
   }
+
+  await db.insert(schema.savedViews).values([
+    { userId: admin, name: "Urgent & open", params: "status=open&priority=urgent" },
+    { userId: admin, name: "Unassigned", params: "assignee=unassigned" },
+    { userId: it, name: "In progress", params: "status=in_progress" },
+  ]);
 
   await close();
   console.log(

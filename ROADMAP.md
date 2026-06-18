@@ -20,7 +20,7 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 - [x] Ticket search, filtering, and pagination
 - [x] Knowledge base articles, linked to tickets, with "did this help?" tracking
 - [x] Mock email-notification log (per-user inbox)
-- [ ] Saved views / queues per IT staff member
+- [x] Saved views / queues per IT staff member
 
 ## Phase 3 — IT operations
 

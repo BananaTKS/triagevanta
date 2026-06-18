@@ -273,6 +273,21 @@ export const onboardingTasks = pgTable(
   (t) => [index("onboarding_tasks_onboarding_idx").on(t.onboardingId)],
 );
 
+// Saved ticket-list filter presets ("queues"), per user.
+export const savedViews = pgTable(
+  "saved_views",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    params: text("params").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("saved_views_user_idx").on(t.userId)],
+);
+
 // ---------------------------------------------------------------------------
 // Relations (for the relational query API)
 // ---------------------------------------------------------------------------
@@ -387,6 +402,7 @@ export type AssetCondition = (typeof assetConditionEnum.enumValues)[number];
 export type AssetEventType = (typeof assetEventTypeEnum.enumValues)[number];
 export type Onboarding = typeof onboardings.$inferSelect;
 export type OnboardingTask = typeof onboardingTasks.$inferSelect;
+export type SavedView = typeof savedViews.$inferSelect;
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];

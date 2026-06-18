@@ -52,7 +52,8 @@ on at the end.
 - **Role-aware dashboards** — employees see their own tickets; staff/admin see
   the full queue, unassigned counts, and SLA breaches.
 - **Search & filtering** — full-text ticket search plus status / priority /
-  category / assignee filters, with pagination.
+  category / assignee filters, with pagination; staff can save filter sets as
+  named "saved views" / queues.
 - **Auto-categorization** — tickets submitted as *Other* are automatically
   labelled (network / hardware / software / access) from their text.
 - **CSV export** — download the (role-scoped) ticket list as CSV for reporting.

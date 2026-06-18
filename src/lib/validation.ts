@@ -140,3 +140,16 @@ export const CreateOnboardingSchema = z.object({
 export const ToggleTaskSchema = z.object({
   taskId: z.uuid(),
 });
+
+export const SaveViewSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(40),
+  params: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((v) => v ?? ""),
+});
+
+export const DeleteViewSchema = z.object({
+  viewId: z.uuid(),
+});

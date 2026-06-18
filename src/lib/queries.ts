@@ -17,6 +17,7 @@ import {
   kbArticles,
   notifications,
   onboardings,
+  savedViews,
   securityEvents,
   tickets,
   users,
@@ -164,6 +165,17 @@ export async function listAllUsers() {
 }
 
 export type UserRow = Awaited<ReturnType<typeof listAllUsers>>[number];
+
+// --- Saved views -------------------------------------------------------------
+
+export async function listSavedViews(userId: string) {
+  return db.query.savedViews.findMany({
+    where: eq(savedViews.userId, userId),
+    orderBy: (v, { asc }) => [asc(v.name)],
+  });
+}
+
+export type SavedViewRow = Awaited<ReturnType<typeof listSavedViews>>[number];
 
 // --- Reporting ---------------------------------------------------------------
 

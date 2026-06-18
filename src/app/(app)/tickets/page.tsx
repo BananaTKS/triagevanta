@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/dal";
-import { listStaffUsers, searchTickets, type TicketFilter } from "@/lib/queries";
+import {
+  listSavedViews,
+  listStaffUsers,
+  searchTickets,
+  type TicketFilter,
+} from "@/lib/queries";
 import { isStaff } from "@/lib/rbac";
 import { btnPrimary, btnSecondary, EmptyState, PageHeader } from "@/components/ui";
 import { TicketsTable } from "@/components/tickets-table";
 import { TicketFilters } from "@/components/ticket-filters";
+import { SavedViews } from "@/components/saved-views";
 import { Pagination } from "@/components/pagination";
 import { CATEGORY_ORDER, PRIORITY_ORDER, STATUS_ORDER } from "@/lib/constants";
 
@@ -39,6 +45,15 @@ export default async function TicketsPage({
 
   const { items, total, page, totalPages } = await searchTickets(user, filter);
   const staffList = staff ? await listStaffUsers() : [];
+  const savedViews = staff ? await listSavedViews(user.id) : [];
+
+  const cp = new URLSearchParams();
+  if (filter.q) cp.set("q", filter.q);
+  if (filter.status) cp.set("status", filter.status);
+  if (filter.priority) cp.set("priority", filter.priority);
+  if (filter.category) cp.set("category", filter.category);
+  if (filter.assignee) cp.set("assignee", filter.assignee);
+  const currentParams = cp.toString();
 
   const hasFilters = Boolean(
     filter.q ||
@@ -64,6 +79,8 @@ export default async function TicketsPage({
           </div>
         }
       />
+
+      {staff && <SavedViews views={savedViews} currentParams={currentParams} />}
 
       <TicketFilters current={filter} staff={staffList} showAssignee={staff} />
 
