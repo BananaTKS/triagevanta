@@ -39,7 +39,7 @@ function navItems(user: CurrentUser): NavItem[] {
 /** Persistent left sidebar (lg and up). */
 export function Sidebar({ user }: { user: CurrentUser }) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-zinc-200 bg-white lg:flex">
+    <aside className="hidden w-60 shrink-0 flex-col border-r border-zinc-200 bg-white lg:flex print:hidden">
       <div className="flex h-14 items-center border-b border-zinc-200 px-4">
         <Logo />
       </div>
@@ -63,7 +63,7 @@ export function Sidebar({ user }: { user: CurrentUser }) {
 /** Compact top bar + horizontal nav for small screens. */
 export function MobileNav({ user }: { user: CurrentUser }) {
   return (
-    <header className="border-b border-zinc-200 bg-white lg:hidden">
+    <header className="border-b border-zinc-200 bg-white lg:hidden print:hidden">
       <div className="flex h-14 items-center justify-between px-4">
         <Logo />
         <div className="flex items-center gap-3">

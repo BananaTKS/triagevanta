@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/dal";
 import { getOnboarding, type OnboardingDetail } from "@/lib/queries";
 import { Card, PageHeader, ProgressBar, SectionTitle } from "@/components/ui";
 import { OnboardingTaskToggle } from "@/components/onboarding-task-toggle";
+import { PrintButton } from "@/components/print-button";
 import { formatDate } from "@/lib/format";
 
 export default async function OnboardingDetailPage({
@@ -32,7 +33,7 @@ export default async function OnboardingDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4">
+      <div className="mb-4 print:hidden">
         <Link href="/onboarding" className="text-sm text-zinc-500 hover:text-zinc-900">
           ← Back to onboarding
         </Link>
@@ -43,6 +44,7 @@ export default async function OnboardingDetailPage({
         description={`${onboarding.title ?? "New joiner"}${
           onboarding.startDate ? ` · starts ${formatDate(onboarding.startDate)}` : ""
         }`}
+        action={<PrintButton />}
       />
 
       <Card className="p-5">

@@ -26,7 +26,7 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 
 - [x] Asset inventory (laptops/monitors, assignment, warranty, lifecycle log)
 - [x] Employee onboarding tracker (checklist template, completion progress)
-- [ ] Onboarding PDF / report export
+- [x] Onboarding print / PDF export (browser print)
 
 ## Phase 4 — automation
 
