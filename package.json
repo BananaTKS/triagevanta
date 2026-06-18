@@ -17,7 +17,7 @@
     "auto-close": "node --env-file-if-exists=.env.local scripts/auto-close.ts"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.5.2",
+    "@electric-sql/pglite": "^0.5.3",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.3",
