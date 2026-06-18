@@ -70,6 +70,8 @@ on at the end.
   grouped by area, with a live completion progress bar and a printable PDF summary.
 - **Security monitoring (admin)** — a unified audit log plus a dashboard that
   flags **failed-login spikes** (5+ failures per account/IP in 15 minutes).
+- **Hardening** — per-IP login rate limiting, security headers + CSP, a
+  `/api/health` check, and CodeQL + Dependabot in CI.
 - **Zero-setup local dev** — runs on an embedded PostgreSQL (PGlite) with no
   Docker required; switch to real Postgres with one env var.
 

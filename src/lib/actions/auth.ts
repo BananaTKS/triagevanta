@@ -7,13 +7,25 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getSession } from "@/lib/dal";
 import { createSession, deleteSession } from "@/lib/session";
-import { logSecurityEvent } from "@/lib/audit";
+import { getRequestContext, logSecurityEvent } from "@/lib/audit";
+import { createRateLimiter } from "@/lib/rate-limit";
 import { LoginSchema, SignupSchema } from "@/lib/validation";
 import type { FormState } from "@/lib/form";
 
 // Fixed-cost comparison target so a missing user takes the same time as a wrong
 // password — avoids leaking which emails are registered (timing/enumeration).
 const DUMMY_HASH = bcrypt.hashSync("triagevanta-dummy-password", 10);
+
+// Per-IP login throttle (in-memory, survives HMR). 8 attempts / 5 minutes.
+const globalForLimiter = globalThis as unknown as {
+  __loginLimiter?: ReturnType<typeof createRateLimiter>;
+};
+const loginLimiter =
+  globalForLimiter.__loginLimiter ??
+  (globalForLimiter.__loginLimiter = createRateLimiter({
+    limit: 8,
+    windowMs: 5 * 60 * 1000,
+  }));
 
 export async function signupAction(
   _prev: FormState,
@@ -67,6 +79,18 @@ export async function loginAction(
   }
 
   const { email, password } = parsed.data;
+
+  // Throttle brute-force attempts per client IP.
+  const { ip } = await getRequestContext();
+  if (!loginLimiter(ip ?? "unknown").allowed) {
+    await logSecurityEvent({
+      type: "login_failure",
+      targetEmail: email,
+      metadata: { reason: "rate_limited" },
+    });
+    return { error: "Too many sign-in attempts. Please wait a few minutes and try again." };
+  }
+
   const user = await db.query.users.findFirst({ where: eq(users.email, email) });
   const passwordOk = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH);
 

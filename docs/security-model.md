@@ -40,6 +40,17 @@ convenience, **not** a security control.
   **spike-detection rule**: 5+ failures for the same account/IP within a 15-minute
   window raise an alert (`src/lib/security-alerts.ts`, unit-tested).
 
+## Hardening
+
+- **Rate limiting** — login is throttled per client IP (8 attempts / 5 minutes,
+  `src/lib/rate-limit.ts`, unit-tested); throttled attempts are audit-logged.
+- **Security headers** (`next.config.ts`) on every response: a Content-Security-
+  Policy, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`, and HSTS.
+- **CI security scanning** — CodeQL analysis and Dependabot updates
+  (`.github/`).
+- **Health check** — `GET /api/health` reports liveness + DB connectivity.
+
 ## OWASP Top 10 mapping
 
 | OWASP category                         | How TriageVanta addresses it                                                                 |
@@ -52,9 +63,12 @@ convenience, **not** a security control.
 | A07 Identification & Auth Failures     | Password policy, anti-enumeration timing, session expiry, failed-login alerting              |
 | A09 Security Logging & Monitoring      | Unified audit log + security dashboard with alert rule                                        |
 
-## Known limitations (tracked in ROADMAP)
+## Known limitations
 
-- No rate limiting yet (planned, Phase 5).
+- The login rate limiter is in-memory (per process); a multi-instance deployment
+  would back it with Redis or similar.
+- The CSP uses `'unsafe-inline'` for scripts rather than per-request nonces — a
+  pragmatic trade-off; nonce-based CSP via the proxy is the stronger next step.
 - No CSRF token beyond SameSite cookies (Server Actions + SameSite=Lax mitigate
-  common cases; explicit CSRF hardening is planned).
-- No email verification / password reset flow in v1.
+  common cases).
+- No email verification / password reset flow.

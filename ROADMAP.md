@@ -39,7 +39,8 @@ are intentionally **out of scope for v1** and tracked as the next phases.
 
 ## Phase 5 — observability & hardening
 
+- [x] Rate limiting on auth endpoints
+- [x] CSP and additional secure headers
+- [x] /health endpoint (liveness + DB check)
+- [x] CodeQL + Dependabot in CI
 - [ ] OpenTelemetry traces/metrics/logs; Prometheus + Grafana
-- [ ] Rate limiting on auth endpoints
-- [ ] CSP and additional secure headers
-- [ ] CodeQL + Dependabot in CI
